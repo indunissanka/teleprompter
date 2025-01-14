@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const fontFamilySelect = document.getElementById('fontFamily');
       const textAlignSelect = document.getElementById('textAlign');
       const mirrorTextCheckbox = document.getElementById('mirrorText');
+      const textColorInput = document.getElementById('textColor');
+      const backgroundColorInput = document.getElementById('backgroundColor');
 
       let animationFrameId;
       let startTime;
@@ -29,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
         teleprompterText.style.fontFamily = fontFamilySelect.value;
         teleprompterText.style.textAlign = textAlignSelect.value;
         teleprompterText.style.transform = mirrorTextCheckbox.checked ? 'scaleX(-1)' : 'scaleX(1)';
+        teleprompterText.style.color = textColorInput.value;
+        teleprompterText.parentElement.style.backgroundColor = backgroundColorInput.value;
       }
 
       function scrollText(timestamp) {
@@ -85,4 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
       fontFamilySelect.addEventListener('change', updateTeleprompter);
       textAlignSelect.addEventListener('change', updateTeleprompter);
       mirrorTextCheckbox.addEventListener('change', updateTeleprompter);
+      textColorInput.addEventListener('input', updateTeleprompter);
+      backgroundColorInput.addEventListener('input', updateTeleprompter);
     });
