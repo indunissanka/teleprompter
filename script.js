@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
       let paused = true;
       let currentScroll = 0;
       let isFullScreen = false;
+      let scrollFunction = null;
+      let fullscreenScrollFunction = null;
 
       function updateTeleprompter() {
         const text = textInput.value;
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       function scrollText(timestamp) {
-         if (paused) {
+        if (paused) {
           return;
         }
 
@@ -69,34 +71,61 @@ document.addEventListener('DOMContentLoaded', function() {
         const scrollAmount = (progress / 1000) * speed;
         currentScroll = scrollAmount;
 
-        const scrollAmountFs = (progress / 1000) * parseInt(speedInputFs.value, 10);
-
         teleprompterText.style.transform = mirrorTextCheckbox.checked ? `scaleX(-1) translateY(-${currentScroll}px)` : `scaleX(1) translateY(-${currentScroll}px)`;
-        fullscreenTeleprompterText.style.transform = mirrorTextCheckboxFs.checked ? `scaleX(-1) translateY(-${scrollAmountFs}px)` : `scaleX(1) translateY(-${scrollAmountFs}px)`;
-
 
         if (teleprompterText.offsetHeight <= currentScroll) {
           currentScroll = 0;
           startTime = null;
         }
 
+        animationFrameId = requestAnimationFrame(scrollText);
+      }
+
+      function fullscreenScrollText(timestamp) {
+        if (paused) {
+          return;
+        }
+
+        if (!startTime) {
+          startTime = timestamp;
+        }
+
+
+        const progress = timestamp - startTime;
+        const speed = parseInt(speedInputFs.value, 10);
+        const scrollAmountFs = (progress / 1000) * speed;
+
+        fullscreenTeleprompterText.style.transform = mirrorTextCheckboxFs.checked ? `scaleX(-1) translateY(-${scrollAmountFs}px)` : `scaleX(1) translateY(-${scrollAmountFs}px)`;
+
         if (fullscreenTeleprompterText.offsetHeight <= scrollAmountFs) {
           startTime = null;
         }
 
-        animationFrameId = requestAnimationFrame(scrollText);
+        fullscreenScrollFunction = requestAnimationFrame(fullscreenScrollText);
       }
+
 
       toggleBtn.addEventListener('click', function() {
         if (paused) {
           paused = false;
           startTime = null;
           updateTeleprompter();
-          animationFrameId = requestAnimationFrame(scrollText);
+          if (!isFullScreen) {
+            scrollFunction = requestAnimationFrame(scrollText);
+          } else {
+            fullscreenScrollFunction = requestAnimationFrame(fullscreenScrollText);
+          }
           toggleBtn.textContent = 'Pause';
         } else {
           paused = true;
-          cancelAnimationFrame(animationFrameId);
+          if (scrollFunction) {
+            cancelAnimationFrame(scrollFunction);
+            scrollFunction = null;
+          }
+          if (fullscreenScrollFunction) {
+            cancelAnimationFrame(fullscreenScrollFunction);
+            fullscreenScrollFunction = null;
+          }
           toggleBtn.textContent = 'Start';
         }
       });
@@ -104,7 +133,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
       resetBtn.addEventListener('click', function() {
         paused = true;
-        cancelAnimationFrame(animationFrameId);
+        if (scrollFunction) {
+          cancelAnimationFrame(scrollFunction);
+          scrollFunction = null;
+        }
+         if (fullscreenScrollFunction) {
+            cancelAnimationFrame(fullscreenScrollFunction);
+            fullscreenScrollFunction = null;
+          }
         currentScroll = 0;
         startTime = null;
         teleprompterText.style.transform = mirrorTextCheckbox.checked ? 'scaleX(-1) translateY(0)' : 'scaleX(1) translateY(0)';
@@ -113,14 +149,26 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       fullScreenBtn.addEventListener('click', function() {
-         isFullScreen = !isFullScreen;
+        isFullScreen = !isFullScreen;
         if (isFullScreen) {
           fullscreenContainer.classList.add('fullscreen-active');
           document.body.style.overflow = 'hidden';
           updateTeleprompter();
+          if (!paused) {
+            if (scrollFunction) {
+              cancelAnimationFrame(scrollFunction);
+              scrollFunction = null;
+            }
+            startTime = null;
+            fullscreenScrollFunction = requestAnimationFrame(fullscreenScrollText);
+          }
         } else {
           fullscreenContainer.classList.remove('fullscreen-active');
           document.body.style.overflow = '';
+          if (fullscreenScrollFunction) {
+            cancelAnimationFrame(fullscreenScrollFunction);
+            fullscreenScrollFunction = null;
+          }
         }
       });
 
@@ -128,6 +176,10 @@ document.addEventListener('DOMContentLoaded', function() {
         isFullScreen = false;
         fullscreenContainer.classList.remove('fullscreen-active');
         document.body.style.overflow = '';
+         if (fullscreenScrollFunction) {
+            cancelAnimationFrame(fullscreenScrollFunction);
+            fullscreenScrollFunction = null;
+          }
       });
 
       textInput.addEventListener('input', updateTeleprompter);
