@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Teleprompter</title>
+      
+      <link rel="stylesheet" href="/assets/index-ec8c6d3e.css">
+    </head>
+    <body>
+      <div class="container">
+        <div class="controls">
+          <textarea id="textInput" placeholder="Enter your script here"></textarea>
+          <div class="settings">
+            <div class="speed-control">
+              <label for="speed">Speed:</label>
+              <input type="number" id="speed" value="10" min="1" max="100">
+            </div>
+            <div class="font-size-control">
+              <label for="fontSize">Font Size:</label>
+              <input type="number" id="fontSize" value="20" min="12" max="48">
+            </div>
+             <div class="font-family-control">
+              <label for="fontFamily">Font:</label>
+              <select id="fontFamily">
+                <option value="sans-serif">Sans-serif</option>
+                <option value="serif">Serif</option>
+                <option value="monospace">Monospace</option>
+              </select>
+            </div>
+            <div class="text-align-control">
+              <label for="textAlign">Align:</label>
+              <select id="textAlign">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div class="mirror-control">
+              <label for="mirrorText">Mirror:</label>
+              <input type="checkbox" id="mirrorText">
+            </div>
+          </div>
+          <div class="button-container">
+            <button id="toggleBtn">Start</button>
+            <button id="resetBtn">Reset</button>
+          </div>
+        </div>
+        <div class="teleprompter-display">
+          <div id="teleprompterText"></div>
+        </div>
+      </div>
+      <script src="script.js"></script>
+    </body>
+    </html>
